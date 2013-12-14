@@ -1,0 +1,151 @@
+﻿<Window x:Class="Mygod.HideEar.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" MinWidth="400" MinHeight="200"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:Mygod.Windows"
+        xmlns:ctrl="clr-namespace:Mygod.Windows.Controls" Height="480" Width="640" Icon="{x:Static m:CurrentApp.MainIcon}"
+        Closing="WindowClosing" Title="{x:Static m:CurrentApp.Title}">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskbarItem" ProgressState="Indeterminate" x:FieldModifier="private" />
+    </Window.TaskbarItemInfo>
+    <TabControl>
+        <TabItem Header="掩耳">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBox Name="LinkBox" AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" 
+                         x:FieldModifier="private" />
+                <ctrl:AlignableWrapPanel Grid.Row="1" HorizontalContentAlignment="Center">
+                    <ctrl:AlignableWrapPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Margin" Value="2" />
+                        </Style>
+                    </ctrl:AlignableWrapPanel.Resources>
+                    <Button Content="掩耳下载(_H)" Click="HideEarProcess" />
+                    <Button Content="使用默认工具下载(_D)" Click="ToolDownload" />
+                    <Button Content="转换到...(_C)" ContextMenuService.Placement="Bottom" Click="PopContextMenu">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="普通下载地址(_N)" Tag="Normal" Click="Convert" />
+                                <MenuItem Header="迅雷下载地址(_T)" Tag="Thunder" Click="Convert" />
+                                <MenuItem Header="快车下载地址(_F)" Tag="FlashGet" Click="Convert" />
+                                <MenuItem Header="旋风下载地址(_Q)" Tag="QQDL" Click="Convert" />
+                                <MenuItem Header="_RayFile下载地址" Tag="RayFile" Click="Convert" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                    <Button Content="分析_YouTube视频下载链接" Click="AnalyzeYouTube" />
+                </ctrl:AlignableWrapPanel>
+                <ctrl:AnimatedProgressBar Grid.Row="2" Height="23" x:Name="Progress" Maximum="0" Foreground="Yellow"
+                                           ValueChanged="ProgressChanged" />
+                <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    下载开始：<TextBlock Text="{Binding Value,ElementName=Progress}" />
+                    /
+                    <TextBlock Text="{Binding Maximum,ElementName=Progress}" />
+                </TextBlock>
+                <ctrl:AnimatedProgressBar Grid.Row="3" Height="23" x:Name="Finished" Maximum="0" Foreground="Lime"
+                                           ValueChanged="ProgressChanged" />
+                <TextBlock Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    下载完成：<TextBlock Text="{Binding Value,ElementName=Finished}" />
+                    /
+                    <TextBlock Text="{Binding Maximum,ElementName=Finished}" />
+                </TextBlock>
+                <ctrl:AnimatedProgressBar Grid.Row="4" Height="23" x:Name="Errors" Maximum="0" Foreground="Red"
+                                           ValueChanged="ProgressChanged" />
+                <TextBlock Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    下载出错：<TextBlock Text="{Binding Value,ElementName=Errors}" />
+                    /
+                    <TextBlock Text="{Binding Maximum,ElementName=Errors}" />
+                </TextBlock>
+            </Grid>
+        </TabItem>
+        <TabItem Header="设置">
+            <Border BorderBrush="#828790" BorderThickness="1" SnapsToDevicePixels="True">
+                <ScrollViewer>
+                    <StackPanel>
+                        <ctrl:AnimatedExpander Header="掩耳(_H)">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Label Content="下载存放目录：(_P)" Target="{Binding ElementName=PathBox}" />
+                                <TextBox Name="PathBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center" Margin="4,0"
+                                         LostFocus="DownloadPathChanged" />
+                                <Button Content="浏览(_B)..." Grid.Column="2" VerticalAlignment="Center" Click="BrowseDirectory"
+                                        Margin="0,0,4,0" />
+                                <Button Content="打开所在文件夹(_E)" Grid.Column="3" VerticalAlignment="Center" Click="BrowseInExplorer" />
+                                <Label Content="最大同时进行任务数：(_M)" Target="{Binding ElementName=MaxThreadsBox}" Grid.Row="1" />
+                                <TextBox Name="MaxThreadsBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center"
+                                         Margin="4,0,0,0" LostFocus="MaxThreadsChanged" Grid.Row="1" Grid.ColumnSpan="3" />
+                            </Grid>
+                        </ctrl:AnimatedExpander>
+                        <ctrl:AnimatedExpander Header="视频(_V)">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Label Content="下载文件名：(_N)" Margin="0,0,4,0" Target="{Binding ElementName=VideoFileNameBox}" />
+                                <ComboBox Name="VideoFileNameBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center" 
+                                          IsEditable="True" LostFocus="VideoFileNameChanged" >
+                                    <ComboBoxItem Content="%T%E" />
+                                    <ComboBoxItem Content="%T - %A%E" />
+                                </ComboBox>
+                                <TextBlock Grid.ColumnSpan="2" Grid.Row="1">
+                                    在下载文件名中您可以使用以下特殊符号：<LineBreak />
+                                    ※ <TextBlock Text="%T" FontWeight="Bold" /> 表示视频的名称；<LineBreak />
+                                    ※ <TextBlock Text="%A" FontWeight="Bold" /> 表示视频的上传者；（土豆视频不支持）<LineBreak />
+                                    ※ <TextBlock Text="%E" FontWeight="Bold" /> 表示视频的格式。
+                                </TextBlock>
+                            </Grid>
+                        </ctrl:AnimatedExpander>
+                        <ctrl:AnimatedExpander Header="代理(_R)">
+                            <StackPanel>
+                                <CheckBox Name="UseProxyCheckBox" x:FieldModifier="private" Click="UseProxyChanged"
+                                          Content="使用代理(_U)" />
+                                <Grid IsEnabled="{Binding IsChecked, ElementName=UseProxyCheckBox}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="4*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Name="ProxyHostBox" x:FieldModifier="private" VerticalAlignment="Center"
+                                             LostFocus="ProxyHostChanged" />
+                                    <TextBlock Text=":" Grid.Column="1" Margin="2,0" />
+                                    <TextBox Name="ProxyPortBox" x:FieldModifier="private" VerticalAlignment="Center" Grid.Column="2" 
+                                             LostFocus="ProxyPortChanged" />
+                                </Grid>
+                            </StackPanel>
+                        </ctrl:AnimatedExpander>
+                        <ctrl:AnimatedExpander Header="日志(_L)">
+                            <StackPanel>
+                                <TextBlock Text="日志记录了下载错误的信息，所有下载失败的任务都可以在其中找到。" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="查看日志(_S)" Margin="0,0,4,0" Click="ShowLog" />
+                                    <Button Content="清理日志(_C)" Click="CleanLog" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ctrl:AnimatedExpander>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </TabItem>
+        <TabItem Header="帮助">
+            <TextBox Name="HelpBox" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" x:FieldModifier="private"
+                     IsReadOnly="True" IsReadOnlyCaretVisible="True" />
+        </TabItem>
+    </TabControl>
+</Window>
