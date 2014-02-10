@@ -24,16 +24,15 @@
                     <BeginStoryboard>
                         <Storyboard RepeatBehavior="Forever">
                             <DoubleAnimation BeginTime="0:0:0" Duration="0:0:1" Storyboard.TargetName="LoadingRotateTransform"
-                                             From="0" To="360" Storyboard.TargetProperty="Angle" />
+                                             From="0" To="-360" Storyboard.TargetProperty="Angle" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Image.Triggers>
         </Image>
-        <ListBox Grid.Row="2" Name="VideoDownloadList" x:FieldModifier="private" MouseDoubleClick="VideoWannaDownload" 
-                 SelectionMode="Extended" Grid.ColumnSpan="4">
-            <ListBox.ContextMenu>
-                <ContextMenu>
+        <ListBox Grid.Row="2" Name="VideoDownloadList" x:FieldModifier="private" SelectionMode="Extended" Grid.ColumnSpan="4">
+            <ListBox.Resources>
+                <ContextMenu x:Key="ItemMenu">
                     <MenuItem Header="使用掩耳下载选中项(_H)" Tag="HideEar" Click="VideoWannaDownload" />
                     <MenuItem Header="复制选中项的下载链接(_C)" Tag="Copy" FontWeight="Bold" Click="VideoWannaDownload" />
                     <MenuItem Header="使用默认下载工具下载选中项(_D)" Tag="Download" Click="VideoWannaDownload" />
@@ -41,10 +40,8 @@
                     <MenuItem Header="使用快车下载选中项(_F)" Tag="FlashGet" Click="VideoWannaDownload" />
                     <MenuItem Header="使用旋风下载选中项(_Q)" Tag="QQDL" Click="VideoWannaDownload" />
                     <MenuItem Header="使用_RayFile下载选中项" Tag="RayFile" Click="VideoWannaDownload" />
-                    <Separator />
-                    <MenuItem Header="属性(_P)" Click="VideoProperties" />
                 </ContextMenu>
-            </ListBox.ContextMenu>
+            </ListBox.Resources>
             <ListBox.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.ContainerStyle>
@@ -54,7 +51,15 @@
                                     <ControlTemplate>
                                         <Expander>
                                             <Expander.Header>
-                                                <Hyperlink NavigateUri="{Binding Name.Url, Mode=OneWay}" Click="OpenLink">
+                                                <Hyperlink NavigateUri="{Binding Name.Url, Mode=OneWay}" Click="VideoClick">
+                                                    <Hyperlink.ContextMenu>
+                                                        <ContextMenu Tag="{Binding Name.Url}">
+                                                            <MenuItem FontWeight="Bold" Header="在浏览器中打开视频(_B)"
+                                                                      Click="VideoBrowse" />
+                                                            <MenuItem Header="分析此视频(_A)..." Click="VideoAnalyze" />
+                                                            <MenuItem Header="复制视频地址(_C)" Click="VideoCopy" />
+                                                        </ContextMenu>
+                                                    </Hyperlink.ContextMenu>
                                                     <Run Text="{Binding Name.Title, Mode=OneWay}" />
                                                 </Hyperlink>
                                             </Expander.Header>
@@ -67,6 +72,18 @@
                     </GroupStyle.ContainerStyle>
                 </GroupStyle>
             </ListBox.GroupStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" ToolTip="{Binding Properties}"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="ContextMenu" Value="{StaticResource ItemMenu}" />
+                    <EventSetter Event="MouseDoubleClick" Handler="VideoWannaDownload" />
+                </Style>
+            </ListBox.ItemContainerStyle>
         </ListBox>
     </Grid>
 </m:GlassWindow>

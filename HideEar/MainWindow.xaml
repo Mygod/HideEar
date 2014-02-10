@@ -1,7 +1,7 @@
-﻿<Window x:Class="Mygod.HideEar.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" MinWidth="400" MinHeight="200"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:Mygod.Windows"
-        xmlns:ctrl="clr-namespace:Mygod.Windows.Controls" Height="480" Width="640" Icon="{x:Static m:CurrentApp.MainIcon}"
-        Closing="WindowClosing" Title="{x:Static m:CurrentApp.Title}">
+﻿<Window x:Class="Mygod.HideEar.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:Mygod.Windows" MinWidth="400" MinHeight="200"
+        xmlns:ctrl="clr-namespace:Mygod.Windows.Controls" xmlns:local="clr-namespace:Mygod.HideEar" Closing="WindowClosing"
+        Height="480" Width="640" Icon="{x:Static m:CurrentApp.MainIcon}" Title="{x:Static m:CurrentApp.Title}">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo x:Name="TaskbarItem" ProgressState="Indeterminate" x:FieldModifier="private" />
     </Window.TaskbarItemInfo>
@@ -36,7 +36,7 @@
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-                    <Button Content="分析_YouTube视频下载链接" Click="AnalyzeYouTube" />
+                    <Button Content="分析 _YouTube 视频下载链接" Click="AnalyzeYouTube" />
                 </ctrl:AlignableWrapPanel>
                 <ctrl:AnimatedProgressBar Grid.Row="2" Height="23" x:Name="Progress" Maximum="0" Foreground="Yellow"
                                            ValueChanged="ProgressChanged" />
@@ -64,7 +64,10 @@
         <TabItem Header="设置">
             <Border BorderBrush="#828790" BorderThickness="1" SnapsToDevicePixels="True">
                 <ScrollViewer>
-                    <StackPanel>
+                    <ScrollViewer.Resources>
+                        <local:Settings x:Key="Settings" />
+                    </ScrollViewer.Resources>
+                    <StackPanel DataContext="{StaticResource Settings}">
                         <ctrl:AnimatedExpander Header="掩耳(_H)">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -78,14 +81,15 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <Label Content="下载存放目录：(_P)" Target="{Binding ElementName=PathBox}" />
-                                <TextBox Name="PathBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center" Margin="4,0"
-                                         LostFocus="DownloadPathChanged" />
+                                <TextBox Name="PathBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center"
+                                         Margin="4,0" Text="{Binding DownloadPath}" />
                                 <Button Content="浏览(_B)..." Grid.Column="2" VerticalAlignment="Center" Click="BrowseDirectory"
                                         Margin="0,0,4,0" />
-                                <Button Content="打开所在文件夹(_E)" Grid.Column="3" VerticalAlignment="Center" Click="BrowseInExplorer" />
+                                <Button Content="打开所在文件夹(_E)" Grid.Column="3" VerticalAlignment="Center"
+                                        Click="BrowseInExplorer" />
                                 <Label Content="最大同时进行任务数：(_M)" Target="{Binding ElementName=MaxThreadsBox}" Grid.Row="1" />
-                                <TextBox Name="MaxThreadsBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center"
-                                         Margin="4,0,0,0" LostFocus="MaxThreadsChanged" Grid.Row="1" Grid.ColumnSpan="3" />
+                                <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0" Text="{Binding MaxTasks}"
+                                         Grid.Row="1" Grid.ColumnSpan="3" />
                             </Grid>
                         </ctrl:AnimatedExpander>
                         <ctrl:AnimatedExpander Header="视频(_V)">
@@ -99,53 +103,46 @@
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
                                 <Label Content="下载文件名：(_N)" Margin="0,0,4,0" Target="{Binding ElementName=VideoFileNameBox}" />
-                                <ComboBox Name="VideoFileNameBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center" 
-                                          IsEditable="True" LostFocus="VideoFileNameChanged" >
+                                <ComboBox Grid.Column="1" VerticalAlignment="Center" IsEditable="True" Text="{Binding VideoFileName}">
                                     <ComboBoxItem Content="%T%E" />
                                     <ComboBoxItem Content="%T - %A%E" />
                                 </ComboBox>
                                 <TextBlock Grid.ColumnSpan="2" Grid.Row="1">
                                     在下载文件名中您可以使用以下特殊符号：<LineBreak />
-                                    ※ <TextBlock Text="%T" FontWeight="Bold" /> 表示视频的名称；<LineBreak />
-                                    ※ <TextBlock Text="%A" FontWeight="Bold" /> 表示视频的上传者；（土豆视频不支持）<LineBreak />
-                                    ※ <TextBlock Text="%E" FontWeight="Bold" /> 表示视频的格式。
+                                    · <TextBlock Text="%T" FontWeight="Bold" /> 表示视频的名称；<LineBreak />
+                                    · <TextBlock Text="%A" FontWeight="Bold" /> 表示视频的上传者；<LineBreak />
+                                    · <TextBlock Text="%E" FontWeight="Bold" /> 表示视频的格式。
                                 </TextBlock>
                             </Grid>
                         </ctrl:AnimatedExpander>
                         <ctrl:AnimatedExpander Header="代理(_R)">
                             <StackPanel>
-                                <CheckBox Name="UseProxyCheckBox" x:FieldModifier="private" Click="UseProxyChanged"
-                                          Content="使用代理(_U)" />
-                                <Grid IsEnabled="{Binding IsChecked, ElementName=UseProxyCheckBox}">
+                                <CheckBox Content="使用代理(_U)" IsChecked="{Binding UseProxy}" />
+                                <Grid IsEnabled="{Binding UseProxy}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="4*" />
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Name="ProxyHostBox" x:FieldModifier="private" VerticalAlignment="Center"
-                                             LostFocus="ProxyHostChanged" />
+                                    <TextBox VerticalAlignment="Center" Text="{Binding ProxyHost}" />
                                     <TextBlock Text=":" Grid.Column="1" Margin="2,0" />
-                                    <TextBox Name="ProxyPortBox" x:FieldModifier="private" VerticalAlignment="Center" Grid.Column="2" 
-                                             LostFocus="ProxyPortChanged" />
+                                    <TextBox VerticalAlignment="Center" Grid.Column="2" Text="{Binding ProxyPort}" />
                                 </Grid>
                             </StackPanel>
                         </ctrl:AnimatedExpander>
-                        <ctrl:AnimatedExpander Header="日志(_L)">
+                        <ctrl:AnimatedExpander Header="高级(_A)">
                             <StackPanel>
                                 <TextBlock Text="日志记录了下载错误的信息，所有下载失败的任务都可以在其中找到。" />
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="查看日志(_S)" Margin="0,0,4,0" Click="ShowLog" />
-                                    <Button Content="清理日志(_C)" Click="CleanLog" />
+                                    <Button Content="查看日志(_S)" Click="ShowLog" />
+                                    <Button Content="清理日志(_C)" Margin="4,0" Click="CleanLog" />
+                                    <Button Content="帮助/检查更新(_S)" Click="Help" />
                                 </StackPanel>
                             </StackPanel>
                         </ctrl:AnimatedExpander>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-        </TabItem>
-        <TabItem Header="帮助">
-            <TextBox Name="HelpBox" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" x:FieldModifier="private"
-                     IsReadOnly="True" IsReadOnlyCaretVisible="True" />
         </TabItem>
     </TabControl>
 </Window>

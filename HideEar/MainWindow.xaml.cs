@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,19 +15,12 @@ using Mygod.Net;
 
 namespace Mygod.HideEar
 {
-    public partial class MainWindow
+    public sealed partial class MainWindow
     {
         public MainWindow()
         {
             InitializeComponent();
-            HelpBox.Text = Properties.Resources.Help;
             Settings.MaxTasksData.DataChanged += (sender, e) => HideEarProcess(Settings.MaxTasks);
-            PathBox.Text = Settings.DownloadPath;
-            MaxThreadsBox.Text = (Settings.MaxTasks = Settings.MaxTasks).ToString(CultureInfo.InvariantCulture);
-            VideoFileNameBox.Text = Settings.VideoFileName;
-            UseProxyCheckBox.IsChecked = Settings.UseProxy;
-            ProxyHostBox.Text = Settings.ProxyHost;
-            ProxyPortBox.Text = Settings.ProxyPort.ToString(CultureInfo.InvariantCulture);
         }
 
         private void WindowClosing(object sender, CancelEventArgs e)
@@ -132,21 +124,21 @@ namespace Mygod.HideEar
                     try
                     {
                         t.DoIt(Dispatcher);
-                        Dispatcher.Invoke((Action)(() =>
+                        Dispatcher.Invoke(() =>
                         {
                             Finished.Value++;
                             Errors.Maximum--;
-                        }));
+                        });
                     }
                     catch (Exception e)
                     {
                         Log.Main.WriteLine(string.Format("掩耳处理时出现错误，详细信息：{0}{2}{1}", t, e.GetMessage(), Environment.NewLine
                             + (string.IsNullOrEmpty(t.AdditionalMessage) ? string.Empty : t.AdditionalMessage + Environment.NewLine)));
-                        Dispatcher.Invoke((Action)(() =>
+                        Dispatcher.Invoke(() =>
                         {
                             Errors.Value++;
                             Finished.Maximum--;
-                        }));
+                        });
                     }
                     HideEarProcessNext(t);
                 });
@@ -161,7 +153,6 @@ namespace Mygod.HideEar
             var fb = new System.Windows.Forms.FolderBrowserDialog { ShowNewFolderButton = true,
                                                                     Description = @"请选择掩耳下载存放目录" };
             if (fb.ShowDialog() != System.Windows.Forms.DialogResult.Cancel) PathBox.Text = fb.SelectedPath;
-            DownloadPathChanged(sender, e);
         }
 
         private void BrowseInExplorer(object sender, RoutedEventArgs e)
@@ -189,40 +180,6 @@ namespace Mygod.HideEar
 
         #region 设置
 
-        private void DownloadPathChanged(object sender, RoutedEventArgs e)
-        {
-            Settings.DownloadPath = PathBox.Text;
-        }
-
-        private void VideoFileNameChanged(object sender, RoutedEventArgs e)
-        {
-            Settings.VideoFileName = VideoFileNameBox.Text;
-        }
-
-        private void UseProxyChanged(object sender, RoutedEventArgs e)
-        {
-            Settings.UseProxy = UseProxyCheckBox.IsChecked == true;
-        }
-
-        private void ProxyHostChanged(object sender, RoutedEventArgs e)
-        {
-            Settings.ProxyHost = ProxyHostBox.Text;
-        }
-
-        private void ProxyPortChanged(object sender, RoutedEventArgs e)
-        {
-            int i;
-            if (int.TryParse(ProxyPortBox.Text, out i) && i > 0) Settings.ProxyPort = i;
-            else ProxyPortBox.Text = Settings.ProxyPort.ToString(CultureInfo.InvariantCulture);
-        }
-
-        private void MaxThreadsChanged(object sender, RoutedEventArgs e)
-        {
-            int i;
-            if (int.TryParse(MaxThreadsBox.Text, out i) && i > 0) Settings.MaxTasks = i;
-            else MaxThreadsBox.Text = Settings.MaxTasks.ToString(CultureInfo.InvariantCulture);
-        }
-
         private void ShowLog(object sender, RoutedEventArgs e)
         {
             Process.Start(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.log"));
@@ -234,6 +191,11 @@ namespace Mygod.HideEar
                             MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private void Help(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://mygod.tk/product/hide-ear/");
+        }
+
         #endregion
     }
 
@@ -241,23 +203,23 @@ namespace Mygod.HideEar
     {
         public abstract void DoIt(Dispatcher dispatcher);
 
-        public string AdditionalMessage { get; set; }
+        public string AdditionalMessage { get; protected set; }
     }
 
-    public class DownloadTask : Task
+    public sealed class DownloadTask : Task
     {
         public DownloadTask(string downloadPath, string fileName, string additional = null)
         {
-            DownloadPath = downloadPath;
-            FileName = fileName;
+            this.downloadPath = downloadPath;
+            this.fileName = fileName;
             AdditionalMessage = additional;
         }
         public DownloadTask(string downloadPath)
         {
-            DownloadPath = downloadPath;
+            this.downloadPath = downloadPath;
         }
 
-        public readonly string DownloadPath, FileName;
+        private readonly string downloadPath, fileName;
 
         public override void DoIt(Dispatcher dispatcher)
         {
@@ -266,27 +228,29 @@ namespace Mygod.HideEar
             try
             {
                 // ReSharper disable AssignNullToNotNullAttribute
-                var request = WebRequest.Create(DownloadPath);
+                var request = WebRequest.Create(downloadPath);
                 request.Proxy = Settings.Proxy;
                 var response = request.GetResponse();
-                var fileName = FileName;
-                if (fileName == null)
+                var name = fileName;
+                if (name == null)
                 {
-                    var disposition = (response.Headers["Content-Disposition"] ?? String.Empty).ToLowerInvariant();
+                    var disposition = (response.Headers["Content-Disposition"] ?? string.Empty).ToLowerInvariant();
                     var pos = disposition.IndexOf("filename=", StringComparison.Ordinal);
-                    fileName = pos >= 0 ? disposition.Substring(pos + 9).Trim('"', '\'') : Path.GetFileName(DownloadPath);
+                    name = pos >= 0 ? disposition.Substring(pos + 9).Trim('"', '\'') : Path.GetFileName(downloadPath);
                 }
-                if (String.IsNullOrWhiteSpace(fileName)) fileName = "noname";
-                if (fileName.Contains('?')) fileName = fileName.Substring(0, fileName.IndexOf('?'));
-                if (fileName.Contains('#')) fileName = fileName.Substring(0, fileName.IndexOf('#'));
-                var path = Path.Combine(Settings.DownloadPath, fileName);
+                if (string.IsNullOrWhiteSpace(name)) name = "noname";
+                if (name.Contains('?')) name = name.Substring(0, name.IndexOf('?'));
+                if (name.Contains('#')) name = name.Substring(0, name.IndexOf('#'));
+                var path = Path.Combine(Settings.DownloadPath, name);
                 if (FileReallyExists(path))
                 {
-                    var extension = Path.GetExtension(path) ?? String.Empty;
+                    var extension = Path.GetExtension(path);
                     var start = path.Substring(0, path.Length - extension.Length);
                     var i = 0;
 #pragma warning disable 642
-                    while (FileReallyExists(path = start + " (" + ++i + ')' + extension)) ;
+                    while (FileReallyExists(path = start + " (" + ++i + ')' + extension))
+                    {
+                    }
 #pragma warning restore 642
                 }
                 using (var reader = new BinaryReader(response.GetResponseStream()))
@@ -317,29 +281,29 @@ namespace Mygod.HideEar
 
         public override string ToString()
         {
-            return DownloadPath;
+            return downloadPath;
         }
     }
 
-    public class AnalyzeYouTubeTask : Task
+    public sealed class AnalyzeYouTubeTask : Task
     {
         public AnalyzeYouTubeTask(string link)
         {
-            Link = link;
+            this.link = link;
         }
 
-        public string Link;
+        private readonly string link;
 
         public override void DoIt(Dispatcher dispatcher)
         {
             YouTubeWindow window = null;
-            dispatcher.Invoke(() => (window = new YouTubeWindow(Link)).Show());
+            dispatcher.Invoke(() => (window = new YouTubeWindow(link)).Show());
             while (window == null || !window.IsClosed) Thread.Sleep(200);
         }
 
         public override string ToString()
         {
-            return Link;
+            return link;
         }
     }
 }

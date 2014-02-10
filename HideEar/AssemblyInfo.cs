@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("掩耳")]
 [assembly: AssemblyDescription("批量下载文件、下载 YouTube 视频必备利器。")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mygod工作室")]
+[assembly: AssemblyCompany("Mygod 工作室™")]
 [assembly: AssemblyProduct("掩耳")]
-[assembly: AssemblyCopyright("Copyright © Mygod 2012-2013")]
+[assembly: AssemblyCopyright("Copyright © Mygod 2012-2014")]
 [assembly: AssemblyTrademark("Mygod")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.25.1")]
-[assembly: AssemblyFileVersion("2.0.25.1")]
+[assembly: AssemblyVersion("2.0.27.1")]
+[assembly: AssemblyFileVersion("2.0.27.1")]

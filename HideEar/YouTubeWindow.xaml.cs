@@ -12,7 +12,7 @@ using Mygod.Net;
 
 namespace Mygod.HideEar
 {
-    public partial class YouTubeWindow
+    public sealed partial class YouTubeWindow
     {
         public YouTubeWindow(string link)
         {
@@ -23,6 +23,7 @@ namespace Mygod.HideEar
             VideoDownloadList.ItemsSource = view;
             (analyzer = new Thread(() =>
             {
+                var aborted = false;
                 try
                 {
                     Dispatcher.Invoke(() =>
@@ -30,7 +31,7 @@ namespace Mygod.HideEar
                         videoLinks.Clear();
                         BusyBox.Visibility = Visibility.Visible;
                     });
-                    foreach (var video in YouTube.Video.GetVideoFromLink(Settings.Client, link).SelectMany(video => video.FmtStreamMap))
+                    foreach (var video in YouTube.Video.GetVideoFromLink(Settings.Proxy, link).SelectMany(video => video.FmtStreamMap))
                     {
                         var copy = video;
                         Dispatcher.Invoke(() => videoLinks.Add(copy));
@@ -38,6 +39,7 @@ namespace Mygod.HideEar
                 }
                 catch (ThreadAbortException)
                 {
+                    aborted = true;
                 }
                 catch (Exception e)
                 {
@@ -47,15 +49,30 @@ namespace Mygod.HideEar
                 }
                 finally
                 {
-                    Dispatcher.Invoke(() => BusyBox.Visibility = Visibility.Collapsed);
+                    if (!aborted) Dispatcher.Invoke(() => BusyBox.Visibility = Visibility.Collapsed);
                 }
             })).Start();
         }
 
-        private void OpenLink(object sender, RoutedEventArgs e)
+        private void VideoClick(object sender, RoutedEventArgs e)
         {
             var hyperlink = sender as Hyperlink;
             if (hyperlink != null) Process.Start(hyperlink.NavigateUri.ToString());
+        }
+
+        private void VideoBrowse(object sender, RoutedEventArgs e)
+        {
+            Process.Start((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString());
+        }
+
+        private void VideoAnalyze(object sender, RoutedEventArgs e)
+        {
+            App.Current.MainWindow.AddToHideEarQueue(new AnalyzeYouTubeTask((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString()));
+        }
+
+        private void VideoCopy(object sender, RoutedEventArgs e)
+        {
+            App.SetClipboardText((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString());
         }
 
         private readonly ObservableCollection<YouTube.FmtStream> videoLinks = new ObservableCollection<YouTube.FmtStream>();
@@ -64,7 +81,7 @@ namespace Mygod.HideEar
         private void VideoWannaDownload(object sender, EventArgs e)
         {
             var s = sender as MenuItem;
-            VideoProcess((s == null ? "HideEar" : s.Tag).ToString());
+            VideoProcess((s == null ? "Copy" : s.Tag).ToString());
         }
 
         private void VideoProcess(string operation)
@@ -103,18 +120,10 @@ namespace Mygod.HideEar
                     }
                     catch (Win32Exception)
                     {
-                        MessageBox.Show("您没有安装指定的软件，因此不能使用这项功能。", "失败",
-                                        MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("您没有安装指定的软件，因此不能使用这项功能。", "失败", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
             }
-        }
-
-        private void VideoProperties(object sender, RoutedEventArgs e)
-        {
-            if (VideoDownloadList.SelectedItem == null) return;
-            new PropertiesWindow(VideoDownloadList.SelectedItems.OfType<YouTube.FmtStream>()
-                .Aggregate(string.Empty, (c, s) => c + s.Properties)).Show();
         }
 
         private void AbortTask(object sender, CancelEventArgs e)
@@ -123,7 +132,9 @@ namespace Mygod.HideEar
             {
                 analyzer.Abort();
             }
-            catch { }
+            catch
+            {
+            }
             IsClosed = true;
         }
 
