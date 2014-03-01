@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using Mygod.Net;
+using Mygod.Windows.Dialogs;
 
 namespace Mygod.HideEar
 {
@@ -43,8 +44,7 @@ namespace Mygod.HideEar
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("发生错误：" + e.Message + Environment.NewLine + "更多信息请见日志。", "错误", 
-                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    TaskDialog.Show(this, "发生错误：" + e.Message, "更多信息请见日志。", TaskDialogType.Error);
                     Log.Main.Write(e);
                 }
                 finally
@@ -120,7 +120,7 @@ namespace Mygod.HideEar
                     }
                     catch (Win32Exception)
                     {
-                        MessageBox.Show("您没有安装指定的软件，因此不能使用这项功能。", "失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                        TaskDialog.Show(this, "您没有安装指定的软件，因此不能使用这项功能。", type: TaskDialogType.Error);
                         return;
                     }
             }

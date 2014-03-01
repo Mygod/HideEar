@@ -11,7 +11,7 @@ namespace Mygod.HideEar
         static Settings()
         {
             var settingsFile = new IniFile("Settings.ini");
-            IniSection settingsSection = new IniSection(settingsFile, "Settings"), proxySection = new IniSection(settingsFile, "Proxy");
+            IniSection settingsSection = settingsFile["Settings"], proxySection = settingsFile["Proxy"];
             DownloadPathData = new StringData(settingsSection, "DownloadPath",
                                               Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads"));
             VideoFileNameData = new StringData(settingsSection, "VideoFileName", "%T%E");

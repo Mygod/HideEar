@@ -106,36 +106,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Helper.cs">
-      <Link>[References]\Helper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\IO\IniFile.cs">
-      <Link>[References]\IniFile.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Net\LinkConverter.cs">
-      <Link>[References]\LinkConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Net\YouTube.cs">
-      <Link>[References]\YouTube.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\Controls\AlignableWrapPanel.cs">
-      <Link>[References]\AlignableWrapPanel.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\Controls\AnimatedExpander.cs">
-      <Link>[References]\AnimatedExpander.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\Controls\AnimatedProgressBar.cs">
-      <Link>[References]\AnimatedProgressBar.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\CurrentApp.cs">
-      <Link>[References]\CurrentApp.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\GlassWindow.cs">
-      <Link>[References]\GlassWindow.cs</Link>
-    </Compile>
-    <Compile Include="..\..\MygodLibrary\MygodLibrary\Windows\TreeHelper.cs">
-      <Link>[References]\TreeHelper.cs</Link>
-    </Compile>
     <Compile Include="Extensions.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Settings.cs" />
@@ -189,6 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Busy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MygodLibrary\MygodLibrary\MygodLibrary.csproj">
+      <Project>{d915ced8-ac3f-40d6-8c95-4d176c924a61}</Project>
+      <Name>MygodLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,6 +12,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using Mygod.Net;
+using Mygod.Windows.Dialogs;
 
 namespace Mygod.HideEar
 {
@@ -71,8 +72,8 @@ namespace Mygod.HideEar
                 {
                     errorsCount++;
                 }
-            if (errorsCount > 0) MessageBox.Show(string.Format("已完成，但是有 {0} 项错误发生。", errorsCount), "完成",
-                                                 MessageBoxButton.OK, MessageBoxImage.Information);
+            if (errorsCount > 0) TaskDialog.Show(this, string.Format("已完成，但是有 {0} 项错误发生。", errorsCount),
+                                                 type: TaskDialogType.Information);
         }
 
         private void AddToHideEarQueue(IEnumerable<Task> tasks)
@@ -187,13 +188,20 @@ namespace Mygod.HideEar
 
         private void CleanLog(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(string.Format("清理日志成功，共清理了 {0}。", R.GetSize(Log.Main.Clear())), "清理完毕",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
+            TaskDialog.Show(this, "清理日志成功。", string.Format("共清理了 {0}。", R.GetSize(Log.Main.Clear())),
+                            TaskDialogType.Information, "清理完毕");
         }
 
         private void Help(object sender, RoutedEventArgs e)
         {
             Process.Start("http://mygod.tk/product/hide-ear/");
+        }
+
+        private void CheckForUpdates(object sender, RoutedEventArgs e)
+        {
+            WebsiteManager.CheckForUpdates(217,
+                () => TaskDialog.Show(this, "没有可用更新。", type: TaskDialogType.Information, title: "检查更新完毕"),
+                exc => TaskDialog.Show(this, "检查更新失败。", type: TaskDialogType.Error, expandedInfo: exc.GetMessage()));
         }
 
         #endregion

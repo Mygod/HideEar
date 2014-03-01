@@ -7,14 +7,14 @@ namespace Mygod.HideEar
         internal static string GetFileName(this YouTube.FmtStream link, bool ignoreExtensions = true)
         {
             return Settings.VideoFileName.Replace("%T", link.Parent.Title).Replace("%A", link.Parent.Author)
-                .Replace("%E", ignoreExtensions ? string.Empty : link.Extension);
+                .Replace("%E", ignoreExtensions ? string.Empty : link.Extension).ToValidPath();
         }
         internal static string GetUrlExtended(this YouTube.FmtStream link)
         {
             return link.GetUrl(link.GetFileName());
         }
 
-        private static readonly string[] Units = new[] { "字节", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB" };
+        private static readonly string[] Units = { "字节", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB" };
 
         public static string GetSize(long size)
         {
