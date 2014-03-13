@@ -1,6 +1,10 @@
 ﻿<m:GlassWindow x:Class="Mygod.HideEar.YouTubeWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="http://schemas.mygodstudio.tk/wpf"
-               Title="YouTube 视频分析器" Icon="{x:Static m:CurrentApp.MainIcon}" Height="480" Width="640" Closing="AbortTask">
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="http://schemas.mygod.tk/wpf"
+               xmlns:local="clr-namespace:Mygod.HideEar" Closing="AbortTask" Title="YouTube 视频分析器"
+               Icon="{x:Static m:CurrentApp.MainIcon}" Height="480" Width="640">
+    <m:GlassWindow.Resources>
+        <local:VideoPropertiesConverter x:Key="VideoProperties" />
+    </m:GlassWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -14,8 +18,8 @@
         <TextBlock TextWrapping="Wrap" Effect="{DynamicResource GlowingEffect}">
             <Run Text="视频地址：" /><Run Name="LinkBox" x:FieldModifier="private" />
         </TextBlock>
-        <Image Name="BusyBox" x:FieldModifier="private" Source="Busy.png" Grid.Column="1" Height="15" VerticalAlignment="Center"
-               RenderTransformOrigin="0.5,0.5" Visibility="Collapsed" Margin="5,0,0,0">
+        <Image Name="BusyBox" x:FieldModifier="private" Source="Busy.png" Grid.Column="1" Height="15"
+               VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed" Margin="5,0,0,0">
             <Image.RenderTransform>
                 <RotateTransform x:Name="LoadingRotateTransform" />
             </Image.RenderTransform>
@@ -23,23 +27,26 @@
                 <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                     <BeginStoryboard>
                         <Storyboard RepeatBehavior="Forever">
-                            <DoubleAnimation BeginTime="0:0:0" Duration="0:0:1" Storyboard.TargetName="LoadingRotateTransform"
+                            <DoubleAnimation BeginTime="0:0:0" Duration="0:0:1"
+                                             Storyboard.TargetName="LoadingRotateTransform"
                                              From="0" To="-360" Storyboard.TargetProperty="Angle" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Image.Triggers>
         </Image>
-        <ListBox Grid.Row="2" Name="VideoDownloadList" x:FieldModifier="private" SelectionMode="Extended" Grid.ColumnSpan="4">
+        <ListBox Grid.Row="2" Name="VideoDownloadList" x:FieldModifier="private" SelectionMode="Extended"
+                 Grid.ColumnSpan="4">
             <ListBox.Resources>
                 <ContextMenu x:Key="ItemMenu">
                     <MenuItem Header="使用掩耳下载选中项(_H)" Tag="HideEar" Click="VideoWannaDownload" />
-                    <MenuItem Header="复制选中项的下载链接(_C)" Tag="Copy" FontWeight="Bold" Click="VideoWannaDownload" />
+                    <MenuItem Header="复制选中项的下载链接(_C)" Tag="Copy" FontWeight="Bold"
+                              Click="VideoWannaDownload" />
                     <MenuItem Header="使用默认下载工具下载选中项(_D)" Tag="Download" Click="VideoWannaDownload" />
                     <MenuItem Header="使用迅雷下载选中项(_T)" Tag="Thunder" Click="VideoWannaDownload" />
                     <MenuItem Header="使用快车下载选中项(_F)" Tag="FlashGet" Click="VideoWannaDownload" />
                     <MenuItem Header="使用旋风下载选中项(_Q)" Tag="QQDL" Click="VideoWannaDownload" />
-                    <MenuItem Header="使用_RayFile下载选中项" Tag="RayFile" Click="VideoWannaDownload" />
+                    <MenuItem Header="使用 _RayFile 下载选中项" Tag="RayFile" Click="VideoWannaDownload" />
                 </ContextMenu>
             </ListBox.Resources>
             <ListBox.GroupStyle>
@@ -51,7 +58,8 @@
                                     <ControlTemplate>
                                         <Expander>
                                             <Expander.Header>
-                                                <Hyperlink NavigateUri="{Binding Name.Url, Mode=OneWay}" Click="VideoClick">
+                                                <Hyperlink NavigateUri="{Binding Name.Url, Mode=OneWay}"
+                                                           Click="VideoClick">
                                                     <Hyperlink.ContextMenu>
                                                         <ContextMenu Tag="{Binding Name.Url}">
                                                             <MenuItem FontWeight="Bold" Header="在浏览器中打开视频(_B)"
@@ -60,6 +68,12 @@
                                                             <MenuItem Header="复制视频地址(_C)" Click="VideoCopy" />
                                                         </ContextMenu>
                                                     </Hyperlink.ContextMenu>
+                                                    <Hyperlink.ToolTip>
+                                                        <ToolTip MaxWidth="400">
+                                                            <TextBlock TextWrapping="Wrap" Text="{Binding Name,
+                                                                    Converter={StaticResource VideoProperties}}" />
+                                                        </ToolTip>
+                                                    </Hyperlink.ToolTip>
                                                     <Run Text="{Binding Name.Title, Mode=OneWay}" />
                                                 </Hyperlink>
                                             </Expander.Header>

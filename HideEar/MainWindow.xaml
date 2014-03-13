@@ -1,6 +1,6 @@
 ﻿<m:GlassWindow x:Class="Mygod.HideEar.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" MinWidth="400" MinHeight="200"
-               xmlns:local="clr-namespace:Mygod.HideEar" xmlns:m="http://schemas.mygodstudio.tk/wpf" Closing="WindowClosing"
+               xmlns:local="clr-namespace:Mygod.HideEar" xmlns:m="http://schemas.mygod.tk/wpf" Closing="WindowClosing"
                Height="480" Width="640" Icon="{x:Static m:CurrentApp.MainIcon}" Title="{x:Static m:CurrentApp.Title}">
     <m:GlassWindow.TaskbarItemInfo>
         <TaskbarItemInfo x:Name="TaskbarItem" ProgressState="Indeterminate" x:FieldModifier="private" />

@@ -161,6 +161,10 @@
     <Resource Include="Busy.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Windows API Code Pack 1.1\source\WindowsAPICodePack\Core\Core.csproj">
+      <Project>{2E1FB0DF-F9BB-4909-9F32-2D9D022A8E57}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MygodLibrary\MygodLibrary\MygodLibrary.csproj">
       <Project>{d915ced8-ac3f-40d6-8c95-4d176c924a61}</Project>
       <Name>MygodLibrary</Name>

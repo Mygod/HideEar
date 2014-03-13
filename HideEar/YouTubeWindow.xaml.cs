@@ -2,14 +2,15 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using Mygod.Net;
-using Mygod.Windows.Dialogs;
 
 namespace Mygod.HideEar
 {
@@ -32,7 +33,8 @@ namespace Mygod.HideEar
                         videoLinks.Clear();
                         BusyBox.Visibility = Visibility.Visible;
                     });
-                    foreach (var video in YouTube.Video.GetVideoFromLink(Settings.Proxy, link).SelectMany(video => video.FmtStreamMap))
+                    foreach (var video in YouTube.Video.GetVideoFromLink(link, Settings.Proxy)
+                                                       .SelectMany(video => video.FmtStreamMap))
                     {
                         var copy = video;
                         Dispatcher.Invoke(() => videoLinks.Add(copy));
@@ -44,7 +46,7 @@ namespace Mygod.HideEar
                 }
                 catch (Exception e)
                 {
-                    TaskDialog.Show(this, "发生错误：" + e.Message, "更多信息请见日志。", TaskDialogType.Error);
+                    TaskDialog.Show(this, "错误", "发生错误：" + e.Message, "更多信息请见日志。", TaskDialogType.Error);
                     Log.Main.Write(e);
                 }
                 finally
@@ -67,7 +69,8 @@ namespace Mygod.HideEar
 
         private void VideoAnalyze(object sender, RoutedEventArgs e)
         {
-            App.Current.MainWindow.AddToHideEarQueue(new AnalyzeYouTubeTask((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString()));
+            App.Current.MainWindow.AddToHideEarQueue
+                (new AnalyzeYouTubeTask((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString()));
         }
 
         private void VideoCopy(object sender, RoutedEventArgs e)
@@ -75,7 +78,8 @@ namespace Mygod.HideEar
             App.SetClipboardText((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString());
         }
 
-        private readonly ObservableCollection<YouTube.FmtStream> videoLinks = new ObservableCollection<YouTube.FmtStream>();
+        private readonly ObservableCollection<YouTube.FmtStream>
+            videoLinks = new ObservableCollection<YouTube.FmtStream>();
         private readonly Thread analyzer;
 
         private void VideoWannaDownload(object sender, EventArgs e)
@@ -120,7 +124,8 @@ namespace Mygod.HideEar
                     }
                     catch (Win32Exception)
                     {
-                        TaskDialog.Show(this, "您没有安装指定的软件，因此不能使用这项功能。", type: TaskDialogType.Error);
+                        TaskDialog.Show(this, "错误", "您没有安装指定的软件，因此不能使用这项功能。",
+                                        type: TaskDialogType.Error);
                         return;
                     }
             }
@@ -139,5 +144,24 @@ namespace Mygod.HideEar
         }
 
         public bool IsClosed;
+    }
+
+    [ValueConversion(typeof(YouTube.Video), typeof(string))]
+    public sealed class VideoPropertiesConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var video = value as YouTube.Video;
+            if (video == null) return null;
+            return string.Format("标题：{0}{8}上传者：{1}{8}关键字：{2}{8}平均评分：{3}{8}观看次数：{4}{8}" +
+                                 "上传时间：{5}{8}时长：{6}{8}地址：{7}", video.Title, video.Author,
+                                 string.Join(", ", video.Keywords), video.AverageRating, video.ViewCount,
+                                 video.UploadTime, video.Length, video.Url, Environment.NewLine);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
     }
 }

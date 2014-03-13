@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
-using Mygod.Windows.Dialogs;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Mygod.HideEar
 {
@@ -11,7 +11,8 @@ namespace Mygod.HideEar
         {
             e.Handled = true;
             Log.Main.Write(e.Exception);
-            TaskDialog.Show(mainInstruction: "出现未知错误！详细信息请见日志。", content: e.Exception.Message, type: TaskDialogType.Error);
+            TaskDialog.Show(null, "错误", "出现未知错误！详细信息请见日志。", type: TaskDialogType.Error,
+                            expandedInfo: e.Exception.GetMessage());
         }
 
         public static new App Current { get { return (App) Application.Current; } }
@@ -25,7 +26,7 @@ namespace Mygod.HideEar
             }
             catch (COMException)
             {
-                TaskDialog.Show(mainInstruction: "复制链接时出错，请重试。", type: TaskDialogType.Error);
+                TaskDialog.Show(null, "错误", "复制链接时出错，请重试。", type: TaskDialogType.Error);
             }
         }
     }
