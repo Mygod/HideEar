@@ -20,7 +20,7 @@ namespace Mygod.HideEar
         {
             InitializeComponent();
             LinkBox.Text = link;
-            var view = CollectionViewSource.GetDefaultView(videoLinks);
+            var view = CollectionViewSource.GetDefaultView(downloads);
             view.GroupDescriptions.Add(new PropertyGroupDescription("Parent"));
             VideoDownloadList.ItemsSource = view;
             (analyzer = new Thread(() =>
@@ -30,14 +30,14 @@ namespace Mygod.HideEar
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        videoLinks.Clear();
+                        downloads.Clear();
                         BusyBox.Visibility = Visibility.Visible;
                     });
                     foreach (var video in YouTube.Video.GetVideoFromLink(link, Settings.Proxy)
-                                                       .SelectMany(video => video.FmtStreamMap))
+                                                       .SelectMany(video => video.Downloads))
                     {
                         var copy = video;
-                        Dispatcher.Invoke(() => videoLinks.Add(copy));
+                        Dispatcher.Invoke(() => downloads.Add(copy));
                     }
                 }
                 catch (ThreadAbortException)
@@ -78,8 +78,8 @@ namespace Mygod.HideEar
             App.SetClipboardText((((ContextMenu)((MenuItem)sender).Parent).Tag ?? string.Empty).ToString());
         }
 
-        private readonly ObservableCollection<YouTube.FmtStream>
-            videoLinks = new ObservableCollection<YouTube.FmtStream>();
+        private readonly ObservableCollection<YouTube.Downloadable>
+            downloads = new ObservableCollection<YouTube.Downloadable>();
         private readonly Thread analyzer;
 
         private void VideoWannaDownload(object sender, EventArgs e)
@@ -95,15 +95,15 @@ namespace Mygod.HideEar
                 .Aggregate(string.Empty, (current, url) => current + (url.GetUrlExtended() + Environment.NewLine)));
             else
             {
-                var links = VideoDownloadList.SelectedItems.OfType<YouTube.FmtStream>();
+                var links = VideoDownloadList.SelectedItems.OfType<YouTube.Downloadable>();
                 foreach (var link in links)
                     try
                     {
                         switch (operation)
                         {
                             case "HideEar":
-                                App.Current.MainWindow.AddToHideEarQueue(
-                                    new DownloadTask(link.GetUrlExtended(), link.GetFileName(false), link.Parent.Url));
+                                App.Current.MainWindow.AddToHideEarQueue(new DownloadTask(link.GetUrlExtended(),
+                                    link.GetFileName(link.GenerateFileName(false)), link.Parent.Url));
                                 break;
                             case "Normal":
                                 Process.Start(link.GetUrlExtended());
