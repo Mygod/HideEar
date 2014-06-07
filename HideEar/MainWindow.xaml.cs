@@ -13,7 +13,6 @@ using System.Windows.Shell;
 using System.Windows.Threading;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Mygod.Net;
-using Mygod.Windows.Dialogs;
 
 namespace Mygod.HideEar
 {

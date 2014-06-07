@@ -103,7 +103,7 @@ namespace Mygod.HideEar
                         {
                             case "HideEar":
                                 App.Current.MainWindow.AddToHideEarQueue(new DownloadTask(link.GetUrlExtended(),
-                                    link.GetFileName(link.GenerateFileName(false)), link.Parent.Url));
+                                    link.GenerateFileName(false).ToValidPath(), link.Parent.Url));
                                 break;
                             case "Normal":
                                 Process.Start(link.GetUrlExtended());
