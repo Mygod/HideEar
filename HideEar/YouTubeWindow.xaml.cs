@@ -46,7 +46,8 @@ namespace Mygod.HideEar
                 }
                 catch (Exception e)
                 {
-                    TaskDialog.Show(this, "错误", "发生错误：" + e.Message, "更多信息请见日志。", TaskDialogType.Error);
+                    Dispatcher.Invoke(() => TaskDialog.Show(this, "错误", "发生错误：" + e.Message, "更多信息请见日志。",
+                                                            TaskDialogType.Error));
                     Log.Main.Write(e);
                 }
                 finally

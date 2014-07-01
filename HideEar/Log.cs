@@ -16,24 +16,32 @@ namespace Mygod.HideEar
 
         private readonly string fileName;
         private StreamWriter writer;
+        private readonly object locker = new object();
 
         public void WriteLine(string stuff)
         {
-            writer.WriteLine("[{0}]\t" + stuff, DateTime.Now);
+            lock (locker) writer.WriteLine("[{0}]\t" + stuff, DateTime.Now);
         }
         public void Write(Exception e)
         {
             if (e == null) return;
             WriteLine("出现错误，详细信息如下：");
-            writer.WriteLine(e.GetMessage());
-            writer.WriteLine();
-            writer.WriteLine();
+            lock (locker)
+            {
+                writer.WriteLine(e.GetMessage());
+                writer.WriteLine();
+                writer.WriteLine();
+            }
         }
         public long Clear()
         {
-            writer.Close();
-            var result = new FileInfo(fileName).Length;
-            writer = new StreamWriter(fileName) {AutoFlush = true};
+            long result;
+            lock (locker)
+            {
+                writer.Close();
+                result = new FileInfo(fileName).Length;
+                writer = new StreamWriter(fileName) { AutoFlush = true };
+            }
             return result;
         }
 
