@@ -92,7 +92,8 @@ namespace Mygod.HideEar
         private void VideoProcess(string operation)
         {
             if (VideoDownloadList.SelectedItem == null) return;
-            if (operation == "Copy") App.SetClipboardText((VideoDownloadList.SelectedItems.OfType<YouTube.FmtStream>())
+            if (operation == "Copy") App.SetClipboardText((VideoDownloadList.SelectedItems
+                .OfType<YouTube.Downloadable>()).Where(url => url.UrlUnavailableException != null)
                 .Aggregate(string.Empty, (current, url) => current + (url.GetUrlExtended() + Environment.NewLine)));
             else
             {
@@ -100,6 +101,7 @@ namespace Mygod.HideEar
                 foreach (var link in links)
                     try
                     {
+                        if (link.UrlUnavailableException != null) continue;
                         switch (operation)
                         {
                             case "HideEar":
@@ -126,7 +128,7 @@ namespace Mygod.HideEar
                     catch (Win32Exception)
                     {
                         TaskDialog.Show(this, "错误", "您没有安装指定的软件，因此不能使用这项功能。",
-                                        type: TaskDialogType.Error);
+                            type: TaskDialogType.Error);
                         return;
                     }
             }
@@ -134,6 +136,7 @@ namespace Mygod.HideEar
 
         private void AbortTask(object sender, CancelEventArgs e)
         {
+            IsClosed = true;
             try
             {
                 analyzer.Abort();
@@ -141,7 +144,6 @@ namespace Mygod.HideEar
             catch
             {
             }
-            IsClosed = true;
         }
 
         public bool IsClosed;
